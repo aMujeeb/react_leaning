@@ -1,4 +1,4 @@
-import React, { useReducer } from "react"; //UseReducer used when need to validate more than 1 condition. Advance state of useState
+import React, { useReducer, useEffect } from "react"; //UseReducer used when need to validate more than 1 condition. Advance state of useState
 
 import { validate } from "../../../util/validators";
 import './Input.css';
@@ -27,7 +27,19 @@ const Input = props => {
     //const [enteredValue, setEnteredValue] = useState('');
     //const [isValid, setIsValid] = useState(false);
 
-    const [inputState, dispatch] = useReducer(inputReducer, { value: '', isTouched: false, isValid: false }); //Setting initial values
+    const [inputState, dispatch] = useReducer(inputReducer, { 
+        value: props.initialValue || '', 
+        isTouched: false, 
+        isValid: props.initialValid || false 
+    }); //Setting initial values
+
+    //Return value of Input...like out -> lambda
+    const { id, onInput } = props;
+    const { value, isValid } = inputState;
+
+    useEffect(() => {
+        props.onInput(props.id, value, isValid)
+    }, [id, value, isValid, onInput]); //[props, inputState] not used because can trigger in infinite loops
 
     const changeHandler = event => {
         dispatch({ type: 'CHANGE', val: event.target.value, validators: props.validators });

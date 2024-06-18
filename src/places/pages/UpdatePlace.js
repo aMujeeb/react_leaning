@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import { useParams } from 'react-router-dom';
 import Input from "../../shared/components/FormElements/Input";
@@ -9,94 +9,118 @@ import { useForm } from "../../shared/hooks/form-hook";
 import './NewPlace.css';
 
 const DUMMY_PLACES = [
-    {
-        id: 'p1',
-        title: 'Sahara Desert',
-        description: 'Worlds largest Desert',
-        imageUrl: 'https://apicms.thestar.com.my/uploads/images/2024/06/11/2741969.jpg',
-        address: 'Sahara Highway, Nigeria',
-        location: {
-            lat: 2.2838233,
-            lng: -11.5405709
-        },
-        creator: 'u1'
+  {
+    id: 'p1',
+    title: 'Sahara Desert',
+    description: 'Worlds largest Desert',
+    imageUrl: 'https://apicms.thestar.com.my/uploads/images/2024/06/11/2741969.jpg',
+    address: 'Sahara Highway, Nigeria',
+    location: {
+      lat: 2.2838233,
+      lng: -11.5405709
     },
-    {
-        id: 'p2',
-        title: 'Gobi Desert',
-        description: 'Worlds second Largest Desert',
-        imageUrl: 'https://img.etimg.com/thumb/msid-110887958,width-1200,height-630,imgsize-35530,overlay-ettech/photo.jpg',
-        address: 'Mongolia',
-        location: {
-            lat: 41.9879811,
-            lng: 95.5015442
-        },
-        creator: 'u2'
-    }
+    creator: 'u1'
+  },
+  {
+    id: 'p2',
+    title: 'Gobi Desert',
+    description: 'Worlds second Largest Desert',
+    imageUrl: 'https://img.etimg.com/thumb/msid-110887958,width-1200,height-630,imgsize-35530,overlay-ettech/photo.jpg',
+    address: 'Mongolia',
+    location: {
+      lat: 41.9879811,
+      lng: 95.5015442
+    },
+    creator: 'u2'
+  }
 ];
 
 const UpdatePlace = () => {
 
-    const placeId = useParams().pId;
+  const [isLoading, setIsLoading] = useState(true);
 
-    const identifiedPlace = DUMMY_PLACES.find(p => p.id === placeId);
+  const placeId = useParams().pId;
 
-    const [formState, inputHandler] = useForm(
-      {
-        title: {
-          value: identifiedPlace.title,
-          isValid: true
-        },
-        description: {
-          value: identifiedPlace.description,
-          isValid: true
-        }
+  //Initial state ----- setForm data is only needed at update place not in new creation place
+  const [formState, inputHandler, setFormData] = useForm(
+    {
+      title: {
+        value: '',
+        isValid: false
       },
-      true
-    );
-  
-    const placeUpdateSubmitHandler = event => {
-      event.preventDefault();
-      console.log(formState.inputs);
-    };
-  
-    if (!identifiedPlace) {
-      return (
-        <div className="center">
-          <h2>Could not find place!</h2>
-        </div>
-      );
-    }
-  
-    return (
-      <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
-        <Input
-          id="title"
-          element="input"
-          type="text"
-          label="Title"
-          validators={[VALIDATOR_REQUIRE()]}
-          errorText="Please enter a valid title."
-          onInput={inputHandler}
-          initialValue={formState.inputs.title.value}
-          initialValid={formState.inputs.title.isValid}
-        />
-        <Input
-          id="description"
-          element="textarea"
-          label="Description"
-          validators={[VALIDATOR_MINLENGTH(5)]}
-          errorText="Please enter a valid description (min. 5 characters)."
-          onInput={inputHandler}
-          initialValue={formState.inputs.description.value}
-          initialValid={formState.inputs.description.isValid}
-        />
-        <Button type="submit" disabled={!formState.isValid}>
-          UPDATE PLACE
-        </Button>
-      </form>
-    );
+      description: {
+        value: '',
+        isValid: false
+      }
+    },
+    false
+  );
+
+  const identifiedPlace = DUMMY_PLACES.find(p => p.id === placeId);
+
+  useEffect(() => {
+    setFormData({
+      title: {
+        value: identifiedPlace.title,
+        isValid: true
+      },
+      description: {
+        value: identifiedPlace.description,
+        isValid: true
+      }
+    }, true);
+    setIsLoading(false);ß
+  }, [setFormData, identifiedPlace]);
+
+  const placeUpdateSubmitHandler = event => {
+    event.preventDefault();
+    console.log(formState.inputs);
   };
-  
-  export default UpdatePlace;
-  
+
+  if (!identifiedPlace) {
+    return (
+      <div className="center">
+        <h2>Could not find place!</h2>
+      </div>
+    );
+  }
+
+  if (!isLoading) {
+    return (
+      <div className="center">
+        <h2>Loading....</h2>
+      </div>
+    );
+  }
+
+  return (
+    <form className="place-form" onSubmit={placeUpdateSubmitHandler}>
+      <Input
+        id="title"
+        element="input"
+        type="text"
+        label="Title"
+        validators={[VALIDATOR_REQUIRE()]}
+        errorText="Please enter a valid title."
+        onInput={inputHandler}
+        initialValue={formState.inputs.title.value}
+        initialValid={formState.inputs.title.isValid}
+      />
+      <Input
+        id="description"
+        element="textarea"
+        label="Description"
+        validators={[VALIDATOR_MINLENGTH(5)]}
+        errorText="Please enter a valid description (min. 5 characters)."
+        onInput={inputHandler}
+        initialValue={formState.inputs.description.value}
+        initialValid={formState.inputs.description.isValid}
+      />
+      <Button type="submit" disabled={!formState.isValid}>
+        UPDATE PLACE
+      </Button>
+    </form>
+  );
+};
+
+export default UpdatePlace;

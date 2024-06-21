@@ -5,6 +5,9 @@ const formReducer = (state, action) => {
         case 'INPUT_CHANGE':
             let formIsValid = true;
             for (const inputId in state.inputs) {
+                if(!state.inputs[inputId]) { //Is the input falsi..or undefined.. if a field is added without content in a switching mode
+                    continue; //this means move to next section
+                }
                 if (inputId === action.inputId) {
                     formIsValid = formIsValid && action.isValid;
                 } else {
